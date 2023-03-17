@@ -3,8 +3,8 @@ package misskey_twitter_post
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
@@ -15,24 +15,43 @@ import (
 )
 
 func init() {
-	functions.HTTP("twitter", TwitterPostMain)
+	functions.HTTP("twitter", TwitterPostEntry)
+}
+
+func TwitterPostEntry(w http.ResponseWriter, r *http.Request) {
+
+	misskeyRequest, err := ParseMisskeyRequest(r)
+	if err != nil {
+		log.Println("Error: ", err.Error())
+		return
+	}
+
+	err = PostToTwitter(misskeyRequest)
+	if err != nil {
+		log.Println("Error: ", err.Error())
+		return
+	}
+
+	log.Println("MisskeyRequest: ", misskeyRequest)
+	log.Println("Host: ", r.Host)
+	log.Printf("Header: %+v", r.Header)
 }
 
 func ParseMisskeyRequest(r *http.Request) (*MisskeyRequest, error) {
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("Response Body Decode Error")
+		log.Println("Response Body Decode Error: ", err.Error())
 		return nil, err
 	}
 	body := string(bodyBytes)
-	fmt.Println("Request Body:", body)
+	log.Println("Response Body: ", body)
 
 	misskeyRequest := &MisskeyRequest{}
 	if err := json.Unmarshal([]byte(body), misskeyRequest); err != nil {
-		fmt.Println("Misskey Body Decode Error")
+		log.Println("Response Body Decode Error: ", err.Error())
 		return nil, err
 	}
-	fmt.Printf("MisskeyRequest: %+v\n", misskeyRequest)
+	log.Printf("MisskeyRequest: %+v", misskeyRequest)
 	return misskeyRequest, nil
 }
 
@@ -44,7 +63,7 @@ func PostToTwitter(misskeyRequest *MisskeyRequest) error {
 	})
 
 	if err != nil {
-		fmt.Println("Twitter Client Init Error")
+		log.Println("Twitter Client Init Error: ", err.Error())
 		return err
 	}
 	p := &types.CreateInput{
@@ -53,29 +72,9 @@ func PostToTwitter(misskeyRequest *MisskeyRequest) error {
 
 	res, err := managetweet.Create(context.Background(), c, p)
 	if err != nil {
-		fmt.Println("Twitter Post Error")
-		fmt.Println(err.Error())
+		log.Println("Twitter Post Error: ", err.Error())
 		return err
 	}
-	fmt.Printf("[%s] %s\n", gotwi.StringValue(res.Data.ID), gotwi.StringValue(res.Data.Text))
+	log.Printf("[%s] %s\n", gotwi.StringValue(res.Data.ID), gotwi.StringValue(res.Data.Text))
 	return nil
-}
-
-func TwitterPostMain(w http.ResponseWriter, r *http.Request) {
-
-	misskeyRequest, err := ParseMisskeyRequest(r)
-	if err != nil {
-		fmt.Printf("error %v", err.Error())
-		return
-	}
-
-	err = PostToTwitter(misskeyRequest)
-	if err != nil {
-		fmt.Printf("error %v", err.Error())
-		return
-	}
-
-	fmt.Println("MisskeyRequest", misskeyRequest)
-	fmt.Println("Host", r.Host)
-	fmt.Println("Header", r.Header)
 }
