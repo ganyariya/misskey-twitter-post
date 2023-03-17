@@ -1,79 +1,81 @@
 package misskey_twitter_post
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"time"
+	"os"
 
 	"github.com/GoogleCloudPlatform/functions-framework-go/functions"
+	"github.com/michimani/gotwi"
+	"github.com/michimani/gotwi/tweet/managetweet"
+	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
 func init() {
-	functions.HTTP("twitter", TwitterPost)
+	functions.HTTP("twitter", TwitterPostMain)
 }
 
-type MisskeyRequest struct {
-	HookId    string             `json:"hookId"`
-	UserId    string             `json:"userId"`
-	EventId   string             `json:"eventId"`
-	CreatedAt int                `json:"createdAt"`
-	Type      string             `json:"type"`
-	Body      MisskeyRequestBody `json:"body"`
-}
-
-type MisskeyRequestBody struct {
-	Note MisskeyNote `json:"note"`
-}
-
-type MisskeyNote struct {
-	ID           string      `json:"id"`
-	CreatedAt    time.Time   `json:"createdAt"`
-	UserID       string      `json:"userId"`
-	User         MisskeyUser `json:"user"`
-	Text         string      `json:"text"`
-	Cw           any         `json:"cw"`
-	Visibility   string      `json:"visibility"`
-	LocalOnly    bool        `json:"localOnly"`
-	RenoteCount  int         `json:"renoteCount"`
-	RepliesCount int         `json:"repliesCount"`
-	Reactions    struct {
-	} `json:"reactions"`
-	ReactionEmojis struct {
-	} `json:"reactionEmojis"`
-	FileIds  []any `json:"fileIds"`
-	Files    []any `json:"files"`
-	ReplyID  any   `json:"replyId"`
-	RenoteID any   `json:"renoteId"`
-}
-
-type MisskeyUser struct {
-	ID             string `json:"id"`
-	Name           string `json:"name"`
-	Username       string `json:"username"`
-	Host           any    `json:"host"`
-	AvatarURL      string `json:"avatarUrl"`
-	AvatarBlurhash string `json:"avatarBlurhash"`
-	IsBot          bool   `json:"isBot"`
-	IsCat          bool   `json:"isCat"`
-	Emojis         struct {
-	} `json:"emojis"`
-	OnlineStatus string `json:"onlineStatus"`
-	BadgeRoles   []any  `json:"badgeRoles"`
-}
-
-func TwitterPost(w http.ResponseWriter, r *http.Request) {
-	bodyBytes, _ := io.ReadAll(r.Body)
+func ParseMisskeyRequest(r *http.Request) (*MisskeyRequest, error) {
+	bodyBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("Response Body Decode Error")
+		return nil, err
+	}
 	body := string(bodyBytes)
-	fmt.Println("Request Body", body)
+	fmt.Println("Request Body:", body)
 
-	var misskeyRequest MisskeyRequest
-	if err := json.Unmarshal([]byte(body), &misskeyRequest); err != nil {
-		fmt.Println("Decode Error")
+	misskeyRequest := &MisskeyRequest{}
+	if err := json.Unmarshal([]byte(body), misskeyRequest); err != nil {
+		fmt.Println("Misskey Body Decode Error")
+		return nil, err
+	}
+	fmt.Printf("MisskeyRequest: %+v\n", misskeyRequest)
+	return misskeyRequest, nil
+}
+
+func PostToTwitter(misskeyRequest *MisskeyRequest) error {
+	c, err := gotwi.NewClient(&gotwi.NewClientInput{
+		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
+		OAuthToken:           os.Getenv("USER_TWITTER_OAUTH_ACCESS_TOKEN"),
+		OAuthTokenSecret:     os.Getenv("USER_TWITTER_OAUTH_ACCESS_TOKEN_SECRET"),
+	})
+
+	if err != nil {
+		fmt.Println("Twitter Client Init Error")
+		return err
+	}
+	p := &types.CreateInput{
+		Text: gotwi.String(misskeyRequest.Body.Note.Text),
 	}
 
-	fmt.Printf("MisskeyRequest %+v\n", misskeyRequest)
+	res, err := managetweet.Create(context.Background(), c, p)
+	if err != nil {
+		fmt.Println("Twitter Post Error")
+		fmt.Println(err.Error())
+		return err
+	}
+	fmt.Printf("[%s] %s\n", gotwi.StringValue(res.Data.ID), gotwi.StringValue(res.Data.Text))
+	return nil
+}
+
+func TwitterPostMain(w http.ResponseWriter, r *http.Request) {
+
+	misskeyRequest, err := ParseMisskeyRequest(r)
+	if err != nil {
+		fmt.Printf("error %v", err.Error())
+		return
+	}
+
+	err = PostToTwitter(misskeyRequest)
+	if err != nil {
+		fmt.Printf("error %v", err.Error())
+		return
+	}
+
+	fmt.Println("MisskeyRequest", misskeyRequest)
 	fmt.Println("Host", r.Host)
 	fmt.Println("Header", r.Header)
 }
