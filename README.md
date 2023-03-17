@@ -11,7 +11,7 @@ go mod tidy
 FUNCTION_TARGET=twitter go run ./cmd/main.go
 
 # deploy
-gcloud functions deploy twitter --entry-point twitter  --trigger-http --runtime go120
+gcloud functions deploy twitter --entry-point twitter  --trigger-http --runtime go120 --env-vars-file .env.yaml
 ```
 
 ## Link
