@@ -81,8 +81,10 @@ func PostToTwitter(misskeyRequest *MisskeyRequest) error {
 		log.Println("Twitter Client Init Error: ", err.Error())
 		return err
 	}
+
+	misskeyAccountUrl := os.Getenv("MISSKEY_ACCOUNT")
 	p := &types.CreateInput{
-		Text: gotwi.String(misskeyRequest.Body.Note.Text),
+		Text: gotwi.String(fmt.Sprintf("%s %s", misskeyRequest.Body.Note.Text, misskeyAccountUrl)),
 	}
 
 	res, err := managetweet.Create(context.Background(), c, p)
