@@ -71,7 +71,7 @@ https://console.cloud.google.com/functions/list
 Then, you fill this endpoint into Misskey Webhook URL.   
 Finally, when you post note on Misskey, misskey and cloud function automatically posts your note to twitter.
 
-#### Local Test
+## Development
 
 ```bash
 # Set Environment Variables
