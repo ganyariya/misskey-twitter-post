@@ -61,7 +61,7 @@ MISSKEY_ACCOUNT: your-misskey.domain/@your-account
 
 ```bash
 # deploy
-gcloud functions deploy twitter --entry-point twitter  --trigger-http --runtime go120 --env-vars-file .env.yaml --allow-unauthenticated
+gcloud functions deploy twitter --entry-point twitter  --trigger-http --runtime go120 --env-vars-file .env.yaml --allow-unauthenticated --max-instances 10
 ```
 
 You can confirm the detail of the function in gcp console.
