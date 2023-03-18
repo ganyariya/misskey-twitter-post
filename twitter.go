@@ -3,6 +3,7 @@ package misskey_twitter_post
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -14,11 +15,19 @@ import (
 	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
+const (
+	X_MISSKEY_HOOK_SECRET_HEADER_KEY = "X-Misskey-Hook-Secret"
+)
+
 func init() {
 	functions.HTTP("twitter", TwitterPostEntry)
 }
 
 func TwitterPostEntry(w http.ResponseWriter, r *http.Request) {
+	if err := ValidateMisskeyHookSecret(r); err != nil {
+		log.Println("Error: ", err.Error())
+		return
+	}
 
 	misskeyRequest, err := ParseMisskeyRequest(r)
 	if err != nil {
@@ -31,10 +40,16 @@ func TwitterPostEntry(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error: ", err.Error())
 		return
 	}
+}
 
-	log.Println("MisskeyRequest: ", misskeyRequest)
-	log.Println("Host: ", r.Host)
+func ValidateMisskeyHookSecret(r *http.Request) error {
 	log.Printf("Header: %+v", r.Header)
+	actualHookSecret := r.Header.Get(X_MISSKEY_HOOK_SECRET_HEADER_KEY)
+	expectedHookSecret := os.Getenv("MISSKEY_HOOK_SECRET")
+	if actualHookSecret != expectedHookSecret {
+		return fmt.Errorf("misskey Hook Secret Error: %s is invalid", actualHookSecret)
+	}
+	return nil
 }
 
 func ParseMisskeyRequest(r *http.Request) (*MisskeyRequest, error) {
