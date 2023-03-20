@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/ganyariya/misskey-twitter-post/pkg/image"
 	"github.com/ganyariya/misskey-twitter-post/pkg/misskey"
 	"github.com/ganyariya/misskey-twitter-post/pkg/twitter"
 )
@@ -20,8 +21,18 @@ func TwitterPostEntry(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error: ", err.Error())
 		return
 	}
-	tweetText := misskeyRequest.BuildTweetText(os.Getenv("MISSKEY_DOMAIN"))
 
+	fileBase64Datas := []string{}
+	for _, url := range misskeyRequest.GetFileUrls() {
+		data, err := image.DLImageToBase64(url)
+		if err != nil {
+			log.Println("Error: ", err.Error())
+			return
+		}
+		fileBase64Datas = append(fileBase64Datas, data)
+	}
+
+	tweetText := misskeyRequest.BuildTweetText(os.Getenv("MISSKEY_DOMAIN"))
 	err = twitter.PostToTwitter(tweetText)
 	if err != nil {
 		log.Println("Error: ", err.Error())
