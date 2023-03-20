@@ -22,11 +22,12 @@ func PostToTwitter(tweetText string, base64MediaIds []string) error {
 		return err
 	}
 
-	p := &types.CreateInput{
-		Text: gotwi.String(tweetText),
-		Media: &types.CreateInputMedia{
+	p := &types.CreateInput{Text: gotwi.String(tweetText)}
+	// MediaIds に空配列を入れると twitter は post できない（えぇ...
+	if len(base64MediaIds) > 0 {
+		p.Media = &types.CreateInputMedia{
 			MediaIDs: base64MediaIds,
-		},
+		}
 	}
 
 	res, err := managetweet.Create(context.Background(), c, p)
