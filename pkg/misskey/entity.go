@@ -1,6 +1,9 @@
-package misskey_twitter_post
+package misskey
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type MisskeyRequest struct {
 	HookId    string             `json:"hookId"`
@@ -9,6 +12,10 @@ type MisskeyRequest struct {
 	CreatedAt int                `json:"createdAt"`
 	Type      string             `json:"type"`
 	Body      MisskeyRequestBody `json:"body"`
+}
+
+func (mr *MisskeyRequest) BuildTweetText(domain string) string {
+	return fmt.Sprintf("%s %s/notes/%s", mr.Body.Note.Text, domain, mr.Body.Note.ID)
 }
 
 type MisskeyRequestBody struct {
