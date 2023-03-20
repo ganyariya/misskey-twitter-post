@@ -10,7 +10,7 @@ import (
 	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
-func PostToTwitter(tweetText string) error {
+func PostToTwitter(tweetText string, base64MediaIds []string) error {
 	c, err := gotwi.NewClient(&gotwi.NewClientInput{
 		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
 		OAuthToken:           os.Getenv("USER_TWITTER_OAUTH_ACCESS_TOKEN"),
@@ -23,6 +23,12 @@ func PostToTwitter(tweetText string) error {
 	}
 
 	p := &types.CreateInput{Text: gotwi.String(tweetText)}
+	// MediaIds に空配列を入れると twitter は post できない（えぇ...
+	if len(base64MediaIds) > 0 {
+		p.Media = &types.CreateInputMedia{
+			MediaIDs: base64MediaIds,
+		}
+	}
 
 	res, err := managetweet.Create(context.Background(), c, p)
 	if err != nil {
