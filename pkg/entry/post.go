@@ -3,6 +3,7 @@ package entry
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ganyariya/misskey-twitter-post/pkg/misskey"
 	"github.com/ganyariya/misskey-twitter-post/pkg/twitter"
@@ -19,8 +20,9 @@ func TwitterPostEntry(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error: ", err.Error())
 		return
 	}
+	tweetText := misskeyRequest.BuildTweetText(os.Getenv("MISSKEY_DOMAIN"))
 
-	err = twitter.PostToTwitter(misskeyRequest)
+	err = twitter.PostToTwitter(tweetText)
 	if err != nil {
 		log.Println("Error: ", err.Error())
 		return

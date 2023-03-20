@@ -2,18 +2,15 @@ package twitter
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/ganyariya/misskey-twitter-post/pkg/misskey"
 	"github.com/michimani/gotwi"
 	"github.com/michimani/gotwi/tweet/managetweet"
 	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
-func PostToTwitter(misskeyRequest *misskey.MisskeyRequest) error {
-
+func PostToTwitter(tweetText string) error {
 	c, err := gotwi.NewClient(&gotwi.NewClientInput{
 		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
 		OAuthToken:           os.Getenv("USER_TWITTER_OAUTH_ACCESS_TOKEN"),
@@ -25,10 +22,7 @@ func PostToTwitter(misskeyRequest *misskey.MisskeyRequest) error {
 		return err
 	}
 
-	misskeyAccountUrl := os.Getenv("MISSKEY_ACCOUNT")
-	p := &types.CreateInput{
-		Text: gotwi.String(fmt.Sprintf("%s %s", misskeyRequest.Body.Note.Text, misskeyAccountUrl)),
-	}
+	p := &types.CreateInput{Text: gotwi.String(tweetText)}
 
 	res, err := managetweet.Create(context.Background(), c, p)
 	if err != nil {

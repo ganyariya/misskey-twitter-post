@@ -52,7 +52,7 @@ USER_TWITTER_OAUTH_ACCESS_TOKEN_SECRET: sample
 MISSKEY_HOOK_SECRET: sample
 
 # Post tweet with misskey account url
-MISSKEY_ACCOUNT: your-misskey.domain/@your-account
+MISSKEY_DOMAIN: your-misskey.domain/@your-account
 ```
 
 ![](docs/twitter_setting.png)
@@ -77,7 +77,7 @@ Finally, when you post note on Misskey, misskey and cloud function automatically
 # Set Environment Variables
 export GOTWI_API_KEY=...
 ...
-export MISSKEY_ACCOUNT=...
+export MISSKEY_DOMAIN=...
 
 FUNCTION_TARGET=twitter go run ./cmd/main.go  
 
