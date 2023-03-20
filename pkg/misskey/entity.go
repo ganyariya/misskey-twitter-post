@@ -1,6 +1,8 @@
-package misskey_twitter_post
+package misskey
 
-import "time"
+import (
+	"time"
+)
 
 type MisskeyRequest struct {
 	HookId    string             `json:"hookId"`
