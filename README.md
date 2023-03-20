@@ -2,6 +2,7 @@
 # Misskey Twitter Post
 
 Cloud function posting Misskey your notes to Twitter.
+You can tweet with images.
 
 ![](docs/architect.png)
 
@@ -90,9 +91,9 @@ You can copy the content `your-misskey-request-json` from gcp console (cloud fun
 
 for example...
 
-- [ ] Post To Twitter with image.
+- [x] Post To Twitter with image.
 - [ ] Split misskey note's text into several tweets of 140 characters, because of twitter restriction
-- [ ] Support Reply Event
+- [x] Support Reply Event
 
 ## Link
 
