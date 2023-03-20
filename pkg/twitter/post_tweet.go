@@ -10,7 +10,7 @@ import (
 	"github.com/michimani/gotwi/tweet/managetweet/types"
 )
 
-func PostToTwitter(tweetText string) error {
+func PostToTwitter(tweetText string, base64MediaIds []string) error {
 	c, err := gotwi.NewClient(&gotwi.NewClientInput{
 		AuthenticationMethod: gotwi.AuthenMethodOAuth1UserContext,
 		OAuthToken:           os.Getenv("USER_TWITTER_OAUTH_ACCESS_TOKEN"),
@@ -22,7 +22,12 @@ func PostToTwitter(tweetText string) error {
 		return err
 	}
 
-	p := &types.CreateInput{Text: gotwi.String(tweetText)}
+	p := &types.CreateInput{
+		Text: gotwi.String(tweetText),
+		Media: &types.CreateInputMedia{
+			MediaIDs: base64MediaIds,
+		},
+	}
 
 	res, err := managetweet.Create(context.Background(), c, p)
 	if err != nil {
