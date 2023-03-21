@@ -52,8 +52,8 @@ USER_TWITTER_OAUTH_ACCESS_TOKEN_SECRET: sample
 # https://misskey.ganyariya.net/settings/webhook
 MISSKEY_HOOK_SECRET: sample
 
-# Post tweet with misskey account url
-MISSKEY_DOMAIN: your-misskey.domain/@your-account
+# Your misskey domain
+MISSKEY_DOMAIN: your-misskey.domain
 ```
 
 ![](docs/twitter_setting.png)
