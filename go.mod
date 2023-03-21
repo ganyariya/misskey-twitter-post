@@ -5,11 +5,18 @@ go 1.20
 require (
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/michimani/gotwi v0.13.0
+	github.com/stretchr/testify v1.7.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
 )
 
 require (
 	cloud.google.com/go/functions v1.0.0 // indirect
-	github.com/ChimeraCoder/anaconda v2.0.0+incompatible // indirect
+	github.com/ChimeraCoder/anaconda v2.0.0+incompatible
 	github.com/ChimeraCoder/tokenbucket v0.0.0-20131201223612-c5a927568de7 // indirect
 	github.com/azr/backoff v0.0.0-20160115115103-53511d3c7330 // indirect
 	github.com/cloudevents/sdk-go/v2 v2.6.1 // indirect
@@ -24,4 +31,5 @@ require (
 	go.uber.org/multierr v1.1.0 // indirect
 	go.uber.org/zap v1.10.0 // indirect
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
+	golang.org/x/text v0.8.0
 )
